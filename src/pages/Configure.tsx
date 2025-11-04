@@ -17,6 +17,8 @@ interface Course {
   lectures: string;
   labs: string;
   duration: string;
+  labName: string;
+  labDuration: string;
   professors: string[];
 }
 
@@ -25,7 +27,7 @@ const Configure = () => {
   const { toast } = useToast();
   const [classrooms, setClassrooms] = useState<Classroom[]>([{ name: "", availableSlots: [] }]);
   const [timeSlotInput, setTimeSlotInput] = useState<{[key: number]: string}>({});
-  const [courses, setCourses] = useState<Course[]>([{ name: "", lectures: "", labs: "", duration: "", professors: [""] }]);
+  const [courses, setCourses] = useState<Course[]>([{ name: "", lectures: "", labs: "", duration: "", labName: "", labDuration: "", professors: [""] }]);
 
   const addClassroom = () => {
     setClassrooms([...classrooms, { name: "", availableSlots: [] }]);
@@ -60,7 +62,7 @@ const Configure = () => {
   };
 
   const addCourse = () => {
-    setCourses([...courses, { name: "", lectures: "", labs: "", duration: "", professors: [""] }]);
+    setCourses([...courses, { name: "", lectures: "", labs: "", duration: "", labName: "", labDuration: "", professors: [""] }]);
   };
 
   const updateCourse = (index: number, field: string, value: string) => {
@@ -89,10 +91,12 @@ const Configure = () => {
 
   const handleSubmit = () => {
     if (classrooms.some(c => !c.name || c.availableSlots.length === 0) || 
-        courses.some(c => !c.name || !c.lectures || !c.duration || c.professors.some(p => !p))) {
+        courses.some(c => !c.name || !c.lectures || !c.duration || 
+        (c.labs && parseInt(c.labs) > 0 && (!c.labName || !c.labDuration)) ||
+        c.professors.some(p => !p))) {
       toast({
         title: "Incomplete configuration",
-        description: "Please fill in all required fields including classroom names, time slots, course duration, and professors",
+        description: "Please fill in all required fields including classroom names, time slots, course duration, lab details (if applicable), and professors",
         variant: "destructive",
       });
       return;
@@ -258,7 +262,7 @@ const Configure = () => {
                             className="mt-1"
                           />
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 gap-4">
                           <div>
                             <Label htmlFor={`lectures-${index}`} className="text-sm">Lectures per Week</Label>
                             <Input
@@ -272,6 +276,22 @@ const Configure = () => {
                             />
                           </div>
                           <div>
+                            <Label htmlFor={`duration-${index}`} className="text-sm">Lecture Duration (hours)</Label>
+                            <Input
+                              id={`duration-${index}`}
+                              type="number"
+                              min="0.5"
+                              step="0.5"
+                              value={course.duration}
+                              onChange={(e) => updateCourse(index, "duration", e.target.value)}
+                              placeholder="e.g., 1"
+                              className="mt-1"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
                             <Label htmlFor={`labs-${index}`} className="text-sm">Labs per Week</Label>
                             <Input
                               id={`labs-${index}`}
@@ -284,15 +304,25 @@ const Configure = () => {
                             />
                           </div>
                           <div>
-                            <Label htmlFor={`duration-${index}`} className="text-sm">Duration (hours)</Label>
+                            <Label htmlFor={`labName-${index}`} className="text-sm">Lab Name</Label>
                             <Input
-                              id={`duration-${index}`}
+                              id={`labName-${index}`}
+                              value={course.labName}
+                              onChange={(e) => updateCourse(index, "labName", e.target.value)}
+                              placeholder="e.g., Computer Lab 1"
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`labDuration-${index}`} className="text-sm">Lab Duration (hours)</Label>
+                            <Input
+                              id={`labDuration-${index}`}
                               type="number"
                               min="0.5"
                               step="0.5"
-                              value={course.duration}
-                              onChange={(e) => updateCourse(index, "duration", e.target.value)}
-                              placeholder="e.g., 1"
+                              value={course.labDuration}
+                              onChange={(e) => updateCourse(index, "labDuration", e.target.value)}
+                              placeholder="e.g., 2"
                               className="mt-1"
                             />
                           </div>
